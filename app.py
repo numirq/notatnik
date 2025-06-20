@@ -39,19 +39,16 @@ class Notatnik:
         ftp_haslo = 'grOga7'
         dzisiaj = datetime.now().strftime('%Y-%m-%d')
         nazwa_plik = f"{subject}_{title}_{dzisiaj}{os.path.splitext(filepath)[1]}"
-        
-        
         folder_path = f"PROGRAMY/lekcje/{subject}/"
-        
+
         try:
             with FTP(ftp_adres) as ftp:
                 ftp.login(user=ftp_uzytkownik, passwd=ftp_haslo)
                 try:
                     ftp.mkd(folder_path)
                 except Exception as e:
-                  
                     print(f'Folder {folder_path} może już istnieć: {e}')
-                
+
                 with open(filepath, 'rb') as plik:
                     ftp.storbinary(f'STOR {folder_path}{nazwa_plik}', plik)
         except Exception as e:
@@ -77,6 +74,7 @@ def upload_file():
 
     return redirect(url_for('index'))
 
+# 🔒 Plik do logowania IP
 LOG_FILE = os.path.join(os.path.dirname(__file__), 'ip_log.txt')
 
 @app.before_request
@@ -84,7 +82,15 @@ def log_ip():
     ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     czas = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     with open(LOG_FILE, 'a', encoding='utf-8') as f:
-        f.write(f"{czas} - {ip}\n")
+        f.write(f"{czas} - {ip} - WEJŚCIE | {request.path}\n")
+
+@app.route('/exit', methods=['POST'])
+def log_exit():
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    czas = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    with open(LOG_FILE, 'a', encoding='utf-8') as f:
+        f.write(f"{czas} - {ip} - WYJŚCIE\n")
+    return '', 204
 
 if __name__ == "__main__":
     webbrowser.open_new('http://127.0.0.1:5000')

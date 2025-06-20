@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notatnik</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Notatnik</h1>
+
+    <!-- Komunikaty -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert">
+                <p>{{ messages[0] }}</p>
+                <button onclick="this.parentElement.style.display='none';">OK</button>
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="text" name="przedmiot" placeholder="Przedmiot" required>
+        <input type="text" name="tytul" placeholder="Tytuł" required>
+        <input type="file" name="file" required>
+        <button type="submit">Wyślij notatkę</button>
+    </form>
+
+    <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="darkmode-toggle">
+            <input type="checkbox" id="darkmode-toggle" />
+            <span class="slider"></span>
+        </label>
+        <span class="theme-label">Ciemny motyw</span>
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggle = document.getElementById('darkmode-toggle');
+    const body = document.body;
+
+    // Zachowaj wybór motywu w localStorage
+    if (localStorage.getItem('dark-mode') === 'true') {
+        body.classList.add('dark-mode');
+        toggle.checked = true;
+    }
+
+    toggle.addEventListener('change', function() {
+        if (this.checked) {
+            body.classList.add('dark-mode');
+            localStorage.setItem('dark-mode', 'true');
+        } else {
+            body.classList.remove('dark-mode');
+            localStorage.setItem('dark-mode', 'false');
+        }
+    });
+});
+</script>
+</body>
+</html>

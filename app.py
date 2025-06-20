@@ -40,16 +40,16 @@ class Notatnik:
         dzisiaj = datetime.now().strftime('%Y-%m-%d')
         nazwa_plik = f"{subject}_{title}_{dzisiaj}{os.path.splitext(filepath)[1]}"
         
-        # Stwórz folder przedmiotu, jeśli nie istnieje
+
         folder_path = f"PROGRAMY/lekcje/{subject}/"
         
         try:
             with FTP(ftp_adres) as ftp:
                 ftp.login(user=ftp_uzytkownik, passwd=ftp_haslo)
                 try:
-                    ftp.mkd(folder_path)  # Utwórz folder przedmiotu
+                    ftp.mkd(folder_path)
                 except Exception as e:
-                    # Ignoruj błąd, jeśli folder już istnieje
+
                     print(f'Folder {folder_path} może już istnieć: {e}')
                 
                 with open(filepath, 'rb') as plik:
@@ -57,7 +57,7 @@ class Notatnik:
         except Exception as e:
             print(f'Wystąpił błąd podczas wysyłania pliku: {e}')
 
-notatnik = Notatnik(przedmiot="EUTK")  # Domyślny przedmiot
+notatnik = Notatnik(przedmiot="EUTK")
 
 @app.route('/')
 def index():
@@ -73,10 +73,10 @@ def upload_file():
         file_path = os.path.join('uploads', uploaded_file.filename)
         uploaded_file.save(file_path)
         notatnik.wyslij_plik_na_ftp(file_path, subject, title)
-        os.remove(file_path)  # Usuń plik lokalnie po wysłaniu na FTP
+        os.remove(file_path)
 
     return redirect(url_for('index'))
 
 if __name__ == "__main__":
-    webbrowser.open_new('http://127.0.0.1:5000')  # Otwiera przeglądarkę od razu
-    app.run(debug=True, use_reloader=False)  # Wyłącz reloader
+    webbrowser.open_new('http://127.0.0.1:5000')
+    app.run(debug=True, use_reloader=False)

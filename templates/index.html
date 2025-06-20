@@ -9,7 +9,7 @@
 <body>
     <h1>Notatnik</h1>
 
-
+    <!-- Komunikaty -->
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             <div class="alert">
@@ -35,26 +35,32 @@
     </div>
 
     <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const toggle = document.getElementById('darkmode-toggle');
-    const body = document.body;
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggle = document.getElementById('darkmode-toggle');
+        const body = document.body;
 
- 
-    if (localStorage.getItem('dark-mode') === 'true') {
-        body.classList.add('dark-mode');
-        toggle.checked = true;
-    }
-
-    toggle.addEventListener('change', function() {
-        if (this.checked) {
+        if (localStorage.getItem('dark-mode') === 'true') {
             body.classList.add('dark-mode');
-            localStorage.setItem('dark-mode', 'true');
-        } else {
-            body.classList.remove('dark-mode');
-            localStorage.setItem('dark-mode', 'false');
+            toggle.checked = true;
         }
+
+        toggle.addEventListener('change', function() {
+            if (this.checked) {
+                body.classList.add('dark-mode');
+                localStorage.setItem('dark-mode', 'true');
+            } else {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('dark-mode', 'false');
+            }
+        });
     });
-});
-</script>
+
+    // Logowanie wyjścia
+    window.addEventListener("beforeunload", function () {
+        navigator.sendBeacon("/exit", JSON.stringify({
+            timestamp: new Date().toISOString()
+        }));
+    });
+    </script>
 </body>
 </html>

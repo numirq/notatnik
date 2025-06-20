@@ -6,6 +6,15 @@ import os
 import webbrowser
 import threading
 
+LOG_FILE = os.path.join(os.path.dirname(__file__), 'ip_log.txt')
+
+@app.before_request
+def log_ip():
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    czas = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    with open(LOG_FILE, 'a', encoding='utf-8') as f:
+        f.write(f"{czas} - {ip}\n")
+
 app = Flask(__name__)
 
 class Notatnik:
@@ -40,7 +49,7 @@ class Notatnik:
         dzisiaj = datetime.now().strftime('%Y-%m-%d')
         nazwa_plik = f"{subject}_{title}_{dzisiaj}{os.path.splitext(filepath)[1]}"
         
-
+       
         folder_path = f"PROGRAMY/lekcje/{subject}/"
         
         try:
@@ -49,7 +58,7 @@ class Notatnik:
                 try:
                     ftp.mkd(folder_path)
                 except Exception as e:
-
+                    
                     print(f'Folder {folder_path} może już istnieć: {e}')
                 
                 with open(filepath, 'rb') as plik:

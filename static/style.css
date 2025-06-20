@@ -37,7 +37,7 @@ button:hover {
     background-color: #218838;
 }
 
-/* Style dla komunikatu o sukcesie */
+
 .alert {
     background-color: #d4edda;
     color: #155724;
@@ -58,7 +58,7 @@ button:hover {
     top: 10px;
 }
 
-/* Przełącznik motywu */
+
 .theme-switch-wrapper {
     position: absolute;
     top: 20px;
@@ -116,7 +116,7 @@ button:hover {
     transform: translateX(20px);
 }
 
-/* Ciemny motyw */
+
 body.dark-mode {
     background-color: #181818;
     color: #f4f4f4;

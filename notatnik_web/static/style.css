@@ -1,0 +1,146 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f4f4f4;
+}
+
+h1 {
+    color: #333;
+}
+
+form {
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+input[type="text"],
+input[type="file"],
+button {
+    display: block;
+    width: 98%;
+    padding: 10px;
+    margin: 10px auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+button {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+/* Style dla komunikatu o sukcesie */
+.alert {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.alert button {
+    background: none;
+    border: none;
+    color: #155724;
+    cursor: pointer;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+
+/* Przełącznik motywu */
+.theme-switch-wrapper {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    display: flex;
+    align-items: center;
+    z-index: 100;
+}
+
+.theme-label {
+    margin-left: 10px;
+    font-size: 14px;
+    color: #333;
+}
+
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.theme-switch input:checked + .slider {
+    background-color: #222;
+}
+
+.theme-switch input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+/* Ciemny motyw */
+body.dark-mode {
+    background-color: #181818;
+    color: #f4f4f4;
+}
+
+body.dark-mode h1,
+body.dark-mode .theme-label {
+    color: #f4f4f4;
+}
+
+body.dark-mode form {
+    background: #232323;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+body.dark-mode input,
+body.dark-mode button {
+    background: #14111136;
+    color: #f4f4f4;
+    border: 1px solid #444;
+}
+
+body.dark-mode .alert {
+    background-color: #232e23;
+    color: #b6fcb6;
+    border: 1px solid #3e4d3e;
+}

@@ -81,15 +81,13 @@ LOG_FILE = os.path.join(os.path.dirname(__file__), 'ip_log.txt')
 def log_ip():
     ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     czas = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    with open(LOG_FILE, 'a', encoding='utf-8') as f:
-        f.write(f"{czas} - {ip} - WEJŚCIE | {request.path}\n")
+    print(f"{czas} - {ip} - WEJŚCIE | {request.path}")
 
 @app.route('/exit', methods=['POST'])
 def log_exit():
     ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     czas = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    with open(LOG_FILE, 'a', encoding='utf-8') as f:
-        f.write(f"{czas} - {ip} - WYJŚCIE\n")
+    print(f"{czas} - {ip} - WYJŚCIE")
     return '', 204
 
 if __name__ == "__main__":

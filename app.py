@@ -3,10 +3,10 @@ import json
 from ftplib import FTP
 from datetime import datetime
 import os
+import requests
 
 app = Flask(__name__)
 
-# === Notatnik ===
 class Notatnik:
     def __init__(self, przedmiot, nazwa_pliku=None):
         if nazwa_pliku is None:
@@ -54,7 +54,6 @@ class Notatnik:
 
 notatnik = Notatnik(przedmiot="EUTK")
 
-# === Strony Flask ===
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -73,17 +72,37 @@ def upload_file():
 
     return redirect(url_for('index'))
 
-# === Logowanie IP ===
+# --- LOGOWANIE IP Z LOKALIZACJĄ ---
 LOG_FILE = os.path.join(os.path.dirname(__file__), 'ip_log.txt')
+
+def get_ip_location(ip):
+    try:
+        response = requests.get(f"http://ip-api.com/json/{ip}")
+        data = response.json()
+        if data["status"] == "success":
+            return f"{data.get('city', 'Nieznane')}, {data.get('country', 'Nieznane')}"
+        else:
+            return "Nieznana lokalizacja"
+    except:
+        return "Błąd pobierania lokalizacji"
 
 @app.before_request
 def log_ip():
     ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     czas = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    with open(LOG_FILE, 'a', encoding='utf-8') as f:
-        f.write(f"{czas} - {ip}\n")
 
-# === Wyświetlanie logów na stronie ===
+    if os.path.exists(LOG_FILE):
+        with open(LOG_FILE, 'r', encoding='utf-8') as f:
+            if ip in f.read():
+                location = ""
+            else:
+                location = get_ip_location(ip)
+    else:
+        location = get_ip_location(ip)
+
+    with open(LOG_FILE, 'a', encoding='utf-8') as f:
+        f.write(f"{czas} - {ip} - {location}\n")
+
 @app.route('/logi')
 def show_logs():
     klucz = request.args.get("klucz")
@@ -99,11 +118,12 @@ def show_logs():
     logs = []
     for line in lines:
         parts = line.strip().split(" - ")
-        if len(parts) == 2:
-            logs.append({'time': parts[0], 'ip': parts[1]})
-    
+        if len(parts) == 3:
+            logs.append({'time': parts[0], 'ip': parts[1], 'location': parts[2]})
+        elif len(parts) == 2:
+            logs.append({'time': parts[0], 'ip': parts[1], 'location': 'brak danych'})
+
     return render_template('logi.html', logs=logs)
 
-# === Uruchomienie ===
 if __name__ == "__main__":
     app.run()

@@ -87,16 +87,22 @@ def log_ip():
 @app.route('/logi')
 def show_logs():
     klucz = request.args.get("klucz")
-    if klucz != "1234":  # ← możesz zmienić hasło GET tutaj
+    if klucz != "1234":
         return "Dostęp zabroniony", 403
 
     try:
         with open(LOG_FILE, 'r', encoding='utf-8') as f:
-            logs = f.readlines()
+            lines = f.readlines()
     except FileNotFoundError:
-        logs = ["Brak logów."]
+        lines = []
 
-    return "<br>".join(logs)
+    logs = []
+    for line in lines:
+        parts = line.strip().split(" - ")
+        if len(parts) == 2:
+            logs.append({'time': parts[0], 'ip': parts[1]})
+    
+    return render_template('logi.html', logs=logs)
 
 # === Uruchomienie ===
 if __name__ == "__main__":

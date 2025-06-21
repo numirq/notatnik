@@ -40,11 +40,13 @@
         <tr>
             <th>Data i godzina</th>
             <th>Adres IP</th>
+            <th>Lokalizacja</th>
         </tr>
         {% for log in logs %}
         <tr>
             <td>{{ log.time }}</td>
             <td>{{ log.ip }}</td>
+            <td>{{ log.location }}</td>
         </tr>
         {% endfor %}
     </table>

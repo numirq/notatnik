@@ -3,11 +3,10 @@ import json
 from ftplib import FTP
 from datetime import datetime
 import os
-import webbrowser
-import threading
 
 app = Flask(__name__)
 
+# === Notatnik ===
 class Notatnik:
     def __init__(self, przedmiot, nazwa_pliku=None):
         if nazwa_pliku is None:
@@ -48,14 +47,14 @@ class Notatnik:
                     ftp.mkd(folder_path)
                 except Exception as e:
                     print(f'Folder {folder_path} może już istnieć: {e}')
-
                 with open(filepath, 'rb') as plik:
                     ftp.storbinary(f'STOR {folder_path}{nazwa_plik}', plik)
         except Exception as e:
-            print(f'Wystąpił błąd podczas wysyłania pliku: {e}')
+            print(f'Błąd podczas wysyłania pliku: {e}')
 
 notatnik = Notatnik(przedmiot="EUTK")
 
+# === Strony Flask ===
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -74,22 +73,31 @@ def upload_file():
 
     return redirect(url_for('index'))
 
-# 🔒 Plik do logowania IP
+# === Logowanie IP ===
 LOG_FILE = os.path.join(os.path.dirname(__file__), 'ip_log.txt')
 
 @app.before_request
 def log_ip():
     ip = request.headers.get('X-Forwarded-For', request.remote_addr)
     czas = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    print(f"{czas} - {ip} - WEJŚCIE | {request.path}")
+    with open(LOG_FILE, 'a', encoding='utf-8') as f:
+        f.write(f"{czas} - {ip}\n")
 
-@app.route('/exit', methods=['POST'])
-def log_exit():
-    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-    czas = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    print(f"{czas} - {ip} - WYJŚCIE")
-    return '', 204
+# === Wyświetlanie logów na stronie ===
+@app.route('/logi')
+def show_logs():
+    klucz = request.args.get("klucz")
+    if klucz != "1234":  # ← możesz zmienić hasło GET tutaj
+        return "Dostęp zabroniony", 403
 
+    try:
+        with open(LOG_FILE, 'r', encoding='utf-8') as f:
+            logs = f.readlines()
+    except FileNotFoundError:
+        logs = ["Brak logów."]
+
+    return "<br>".join(logs)
+
+# === Uruchomienie ===
 if __name__ == "__main__":
-    webbrowser.open_new('http://127.0.0.1:5000')
-    app.run(debug=True, use_reloader=False)
+    app.run()

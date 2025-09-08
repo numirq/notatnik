@@ -41,7 +41,7 @@ class Notatnik:
         nazwa_plik = f"{subject}_{title}_{dzisiaj}{os.path.splitext(filepath)[1]}"
         
         
-        folder_path = f"Programy/Lekcje/{subject}/"
+        folder_path = f"PROGRAMY/lekcje/{subject}/"
         
         try:
             with FTP(ftp_adres) as ftp:

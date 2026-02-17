@@ -35,7 +35,7 @@ class Notatnik:
 
     def wyslij_plik_na_ftp(self, filepath, subject, title):
         ftp_adres = 'mzsp.edu.pl'
-        ftp_uzytkownik = '3TI'
+        ftp_uzytkownik = '2TI'
         ftp_haslo = 'grOga7'
         dzisiaj = datetime.now().strftime('%Y-%m-%d')
         nazwa_plik = f"{subject}_{title}_{dzisiaj}{os.path.splitext(filepath)[1]}"

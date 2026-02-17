@@ -10,7 +10,7 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-m
 app.config['MAX_CONTENT_LENGTH'] = int(os.environ.get('MAX_CONTENT_LENGTH_MB', 16)) * 1024 * 1024
 
 BASE_DIR = os.path.dirname(__file__)
-UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
+        ftp_uzytkownik = '2TI'
 LOG_FILE = os.path.join(BASE_DIR, 'ip_log.txt')
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 

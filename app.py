@@ -1,12 +1,39 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 import json
 from ftplib import FTP
 from datetime import datetime
 import os
-import webbrowser
-import threading
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-me')
+app.config['MAX_CONTENT_LENGTH'] = int(os.environ.get('MAX_CONTENT_LENGTH_MB', 16)) * 1024 * 1024
+
+BASE_DIR = os.path.dirname(__file__)
+UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')
+LOG_FILE = os.path.join(BASE_DIR, 'ip_log.txt')
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+ALLOWED_EXTENSIONS = {
+    ext.strip().lower()
+    for ext in os.environ.get('ALLOWED_EXTENSIONS', 'txt,pdf,doc,docx,jpg,jpeg,png').split(',')
+    if ext.strip()
+}
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def get_saved_uploads():
+    files = []
+    for name in os.listdir(UPLOAD_DIR):
+        path = os.path.join(UPLOAD_DIR, name)
+        if os.path.isfile(path):
+            files.append((name, os.path.getmtime(path)))
+    files.sort(key=lambda item: item[1], reverse=True)
+    return [name for name, _ in files]
+
 
 class Notatnik:
     def __init__(self, przedmiot, nazwa_pliku=None):
@@ -33,51 +60,86 @@ class Notatnik:
         self.notatki.append(notatka)
         self.zapisz_notatki()
 
+    def ftp_configured(self):
+        return all([
+            os.environ.get('FTP_HOST'),
+            os.environ.get('FTP_USER'),
+            os.environ.get('FTP_PASSWORD')
+        ])
+
     def wyslij_plik_na_ftp(self, filepath, subject, title):
-        ftp_adres = 'mzsp.edu.pl'
-        ftp_uzytkownik = '3TI'
-        ftp_haslo = 'grOga7'
+        ftp_adres = os.environ.get('FTP_HOST')
+        ftp_uzytkownik = os.environ.get('FTP_USER')
+        ftp_haslo = os.environ.get('FTP_PASSWORD')
+
+        if not ftp_adres or not ftp_uzytkownik or not ftp_haslo:
+            raise ValueError('Brak konfiguracji FTP (FTP_HOST, FTP_USER, FTP_PASSWORD).')
+
         dzisiaj = datetime.now().strftime('%Y-%m-%d')
-        nazwa_plik = f"{subject}_{title}_{dzisiaj}{os.path.splitext(filepath)[1]}"
-        
-        
-        folder_path = f"PROGRAMY/lekcje/{subject}/"
-        
+        safe_subject = secure_filename(subject) or 'przedmiot'
+        safe_title = secure_filename(title) or 'notatka'
+        nazwa_plik = f"{safe_subject}_{safe_title}_{dzisiaj}{os.path.splitext(filepath)[1]}"
+        folder_path = f"PROGRAMY/lekcje/{safe_subject}/"
+
         try:
             with FTP(ftp_adres) as ftp:
                 ftp.login(user=ftp_uzytkownik, passwd=ftp_haslo)
                 try:
                     ftp.mkd(folder_path)
-                except Exception as e:
-                  
-                    print(f'Folder {folder_path} może już istnieć: {e}')
-                
+                except Exception:
+                    pass
+
                 with open(filepath, 'rb') as plik:
                     ftp.storbinary(f'STOR {folder_path}{nazwa_plik}', plik)
         except Exception as e:
-            print(f'Wystąpił błąd podczas wysyłania pliku: {e}')
+            raise RuntimeError(f'Wystąpił błąd podczas wysyłania pliku: {e}') from e
 
-notatnik = Notatnik(przedmiot="EUTK")
+
+notatnik = Notatnik(przedmiot='EUTK')
+
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', saved_uploads=get_saved_uploads())
+
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    subject = request.form['przedmiot']
-    title = request.form['tytul']
-    uploaded_file = request.files['file']
+    subject = request.form.get('przedmiot', '').strip()
+    title = request.form.get('tytul', '').strip()
+    uploaded_file = request.files.get('file')
 
-    if uploaded_file.filename != '':
-        file_path = os.path.join('uploads', uploaded_file.filename)
-        uploaded_file.save(file_path)
-        notatnik.wyslij_plik_na_ftp(file_path, subject, title)
-        os.remove(file_path)
+    if not subject or not title:
+        flash('Uzupełnij pola: przedmiot i tytuł.')
+        return redirect(url_for('index'))
+
+    if not uploaded_file or uploaded_file.filename == '':
+        flash('Nie wybrano pliku.')
+        return redirect(url_for('index'))
+
+    if not allowed_file(uploaded_file.filename):
+        flash('Nieobsługiwany format pliku.')
+        return redirect(url_for('index'))
+
+    safe_subject = secure_filename(subject) or 'przedmiot'
+    safe_title = secure_filename(title) or 'notatka'
+    ext = os.path.splitext(secure_filename(uploaded_file.filename))[1].lower()
+    dzisiaj = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    filename = f'{safe_subject}_{safe_title}_{dzisiaj}{ext}'
+    file_path = os.path.join(UPLOAD_DIR, filename)
+    uploaded_file.save(file_path)
+
+    if notatnik.ftp_configured():
+        try:
+            notatnik.wyslij_plik_na_ftp(file_path, subject, title)
+            flash('Plik został wysłany na FTP i zapisany lokalnie.')
+        except Exception as e:
+            flash(f'Błąd FTP. Plik zapisano lokalnie. Szczegóły: {e}')
+    else:
+        flash('Plik zapisany lokalnie (FTP nie jest skonfigurowane).')
 
     return redirect(url_for('index'))
 
-LOG_FILE = os.path.join(os.path.dirname(__file__), 'ip_log.txt')
 
 @app.before_request
 def log_ip():
@@ -86,6 +148,6 @@ def log_ip():
     with open(LOG_FILE, 'a', encoding='utf-8') as f:
         f.write(f"{czas} - {ip}\n")
 
-if __name__ == "__main__":
-    webbrowser.open_new('http://127.0.0.1:5000')
-    app.run(debug=True, use_reloader=False)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)

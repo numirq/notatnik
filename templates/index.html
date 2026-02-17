@@ -9,7 +9,6 @@
 <body>
     <h1>Notatnik</h1>
 
-
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             <div class="alert">
@@ -22,9 +21,23 @@
     <form action="/upload" method="post" enctype="multipart/form-data">
         <input type="text" name="przedmiot" placeholder="Przedmiot" required>
         <input type="text" name="tytul" placeholder="Tytuł" required>
-        <input type="file" name="file" required>
+        <input type="file" name="file" accept=".txt,.pdf,.doc,.docx,.jpg,.jpeg,.png" required>
+        <small>Dozwolone: txt, pdf, doc, docx, jpg, jpeg, png</small>
         <button type="submit">Wyślij notatkę</button>
     </form>
+
+    <section class="uploads-list">
+        <h2>Ostatnio zapisane pliki</h2>
+        {% if saved_uploads %}
+            <ul>
+                {% for file_name in saved_uploads[:10] %}
+                    <li>{{ file_name }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Brak zapisanych plików.</p>
+        {% endif %}
+    </section>
 
     <div class="theme-switch-wrapper">
         <label class="theme-switch" for="darkmode-toggle">
@@ -39,7 +52,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggle = document.getElementById('darkmode-toggle');
     const body = document.body;
 
- 
     if (localStorage.getItem('dark-mode') === 'true') {
         body.classList.add('dark-mode');
         toggle.checked = true;

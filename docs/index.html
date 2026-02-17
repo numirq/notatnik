@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notatnik (GitHub Pages)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Notatnik</h1>
+  <p class="info">Ta wersja działa jako strona statyczna na GitHub Pages.</p>
+  <p class="info">Upload plików i backend Flask/FTP nie działają na samym GitHub Pages.</p>
+
+  <form>
+    <input type="text" name="przedmiot" placeholder="Przedmiot" disabled>
+    <input type="text" name="tytul" placeholder="Tytuł" disabled>
+    <input type="file" name="file" disabled>
+    <button type="button" disabled>Wyślij notatkę</button>
+  </form>
+
+  <div class="alert">
+    <p>Aby przywrócić wysyłkę plików, potrzebny jest backend (np. VPS/Railway/Fly.io).</p>
+  </div>
+
+  <div class="theme-switch-wrapper">
+    <label class="theme-switch" for="darkmode-toggle">
+      <input type="checkbox" id="darkmode-toggle" />
+      <span class="slider"></span>
+    </label>
+    <span class="theme-label">Ciemny motyw</span>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const toggle = document.getElementById('darkmode-toggle');
+      const body = document.body;
+
+      if (localStorage.getItem('dark-mode') === 'true') {
+        body.classList.add('dark-mode');
+        toggle.checked = true;
+      }
+
+      toggle.addEventListener('change', function() {
+        if (this.checked) {
+          body.classList.add('dark-mode');
+          localStorage.setItem('dark-mode', 'true');
+        } else {
+          body.classList.remove('dark-mode');
+          localStorage.setItem('dark-mode', 'false');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

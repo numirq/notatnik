@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: notatnik
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FTP_HOST
+        sync: false
+      - key: FTP_USER
+        sync: false
+      - key: FTP_PASSWORD
+        sync: false
+      - key: ALLOWED_EXTENSIONS
+        value: txt,pdf,doc,docx,jpg,jpeg,png
+      - key: MAX_CONTENT_LENGTH_MB
+        value: "16"

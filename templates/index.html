@@ -22,7 +22,8 @@
     <form action="/upload" method="post" enctype="multipart/form-data">
         <input type="text" name="przedmiot" placeholder="Przedmiot" required>
         <input type="text" name="tytul" placeholder="Tytuł" required>
-        <input type="file" name="file" required>
+        <input type="file" name="file" accept=".txt,.pdf,.doc,.docx,.jpg,.jpeg,.png" required>
+        <small>Dozwolone: txt, pdf, doc, docx, jpg, jpeg, png</small>
         <button type="submit">Wyślij notatkę</button>
     </form>
 

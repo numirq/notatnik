@@ -37,6 +37,14 @@ button:hover {
     background-color: #218838;
 }
 
+small {
+    display: block;
+    width: 98%;
+    margin: -4px auto 8px;
+    color: #666;
+    font-size: 13px;
+}
+
 
 .alert {
     background-color: #d4edda;
@@ -137,6 +145,10 @@ body.dark-mode button {
     background: #14111136;
     color: #f4f4f4;
     border: 1px solid #444;
+}
+
+body.dark-mode small {
+    color: #bdbdbd;
 }
 
 body.dark-mode .alert {
